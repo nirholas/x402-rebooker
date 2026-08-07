@@ -62,13 +62,13 @@ The startup banner lists both payment rails and which inventory providers are li
 The same information is available over HTTP, for free:
 
 ```bash
-curl -s http://localhost:4021/sources | jq
+curl -s http://localhost:4043/sources | jq
 ```
 
 ## 4. Your first 402
 
 ```bash
-curl -si -X POST http://localhost:4021/scan \
+curl -si -X POST http://localhost:4043/scan \
   -H 'content-type: application/json' \
   -d '{"domain":"flight","current":{"origin":"JFK","destination":"LAX","departureDate":"2026-09-14","pricePaidUsd":412},"cancellationFeeUsd":75,"minSavingsUsd":25}'
 ```
@@ -76,7 +76,7 @@ curl -si -X POST http://localhost:4021/scan \
 You get `HTTP/1.1 402 Payment Required` and a JSON body whose `accepts[]` array holds **two** x402 `PaymentRequirements` — one per rail, same price:
 
 ```bash
-curl -s -X POST http://localhost:4021/scan \
+curl -s -X POST http://localhost:4043/scan \
   -H 'content-type: application/json' \
   -d '{"domain":"flight","current":{"origin":"JFK","destination":"LAX","departureDate":"2026-09-14","pricePaidUsd":412}}' \
   | jq '.accepts[] | {network, payTo, asset, maxAmountRequired}'
@@ -153,7 +153,7 @@ Fixtures are seeded from the booking you posted, so the same request always retu
 ### Verify the signature
 
 ```bash
-curl -s -X POST http://localhost:4021/verify \
+curl -s -X POST http://localhost:4043/verify \
   -H 'content-type: application/json' -d "$(jq -c '.report' report.json)"
 # {"valid":true}
 ```

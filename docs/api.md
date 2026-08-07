@@ -1,6 +1,6 @@
 # API reference
 
-Base URL: your deployment (default `http://localhost:4021`). Machine-readable: [`openapi.json`](https://github.com/nirholas/x402-rebooker/blob/main/openapi.json) · [`/.well-known/x402`](https://github.com/nirholas/x402-rebooker/blob/main/public/.well-known/x402).
+Base URL: your deployment (default `http://localhost:4043`). Machine-readable: [`openapi.json`](https://github.com/nirholas/x402-rebooker/blob/main/openapi.json) · [`/.well-known/x402`](https://github.com/nirholas/x402-rebooker/blob/main/public/.well-known/x402).
 
 All paid routes follow x402: unpaid request → `402` + `PaymentRequirements`; request with a valid `X-PAYMENT` header → `200` + artifact + `X-PAYMENT-RESPONSE`.
 
@@ -40,6 +40,7 @@ The Solana entry carries `extra.feePayer` — the facilitator account that spons
 
 ```json
 { "success": true, "rail": "solana", "network": "solana",
+  "facilitator": "https://facilitator.payai.network",
   "transaction": "5xY…", "payer": "7hF…", "amount": "10000", "asset": "USDC" }
 ```
 
@@ -115,6 +116,7 @@ Scan current inventory against a booking you already hold.
     "signature": "hex", "algorithm": "HMAC-SHA256", "canonicalization": "sorted-json"
   },
   "payment": { "success": true, "rail": "solana", "network": "solana",
+               "facilitator": "https://facilitator.payai.network",
                "transaction": "5xY…", "amount": "10000", "asset": "USDC" }
 }
 ```

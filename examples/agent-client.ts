@@ -13,7 +13,7 @@
  *   4. POST /verify (free) — re-check the signature on what we bought
  *
  * Usage:
- *   PRIVATE_KEY=0x... BASE_URL=http://localhost:4021 npm run client
+ *   PRIVATE_KEY=0x... BASE_URL=http://localhost:4043 npm run client
  *
  * PRIVATE_KEY must hold Base Sepolia USDC (faucet: https://faucet.circle.com).
  */
@@ -23,7 +23,7 @@ import { wrapFetchWithPayment, decodeXPaymentResponse } from "x402-fetch";
 
 config();
 
-const BASE_URL = process.env.BASE_URL ?? "http://localhost:4021";
+const BASE_URL = process.env.BASE_URL ?? "http://localhost:4043";
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 if (!PRIVATE_KEY) {
@@ -159,7 +159,7 @@ main().catch((err) => {
  *
  * And the raw dual-rail 402 body, for reference:
  *
- *   curl -s -X POST http://localhost:4021/scan -H 'content-type: application/json' \\
+ *   curl -s -X POST http://localhost:4043/scan -H 'content-type: application/json' \\
  *     -d '{"domain":"flight","current":{"origin":"JFK","destination":"LAX","departureDate":"2026-09-14","pricePaidUsd":412}}' \\
  *     | jq '.accepts[] | {network, payTo, maxAmountRequired}'
  *

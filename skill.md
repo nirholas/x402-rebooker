@@ -4,7 +4,7 @@ The cancel-worse-book-better move, automated. Post a booking you already hold â€
 
 **Pay in USDC on Base or Solana â€” your client picks the rail.** Every 402 challenge lists both.
 
-**Base URL**: `{BASE_URL}` (self-hosted; default `http://localhost:4021`)
+**Base URL**: `{BASE_URL}` (self-hosted; default `http://localhost:4043`)
 
 ## Endpoints
 

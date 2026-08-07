@@ -11,7 +11,7 @@ Every paid route is **dual rail**: the 402 lists USDC on Base *and* USDC on Sola
 ## 0. Will this scan be live? (free)
 
 ```bash
-curl -s http://localhost:4021/sources | jq
+curl -s http://localhost:4043/sources | jq
 ```
 
 ```json
@@ -28,7 +28,7 @@ curl -s http://localhost:4021/sources | jq
 ## 1. Hit the paid route without payment → 402
 
 ```bash
-curl -si -X POST http://localhost:4021/scan \
+curl -si -X POST http://localhost:4043/scan \
   -H 'content-type: application/json' \
   -d '{
     "domain": "flight",
@@ -52,7 +52,7 @@ Content-Type: application/json
       "scheme": "exact",
       "network": "base-sepolia",
       "maxAmountRequired": "10000",
-      "resource": "http://localhost:4021/scan",
+      "resource": "http://localhost:4043/scan",
       "payTo": "0x40252CFDF8B20Ed757D61ff157719F33Ec332402",
       "asset": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
       "extra": { "name": "USDC", "version": "2" }
@@ -61,7 +61,7 @@ Content-Type: application/json
       "scheme": "exact",
       "network": "solana",
       "maxAmountRequired": "10000",
-      "resource": "http://localhost:4021/scan",
+      "resource": "http://localhost:4043/scan",
       "payTo": "WwwuGbqHrwF5RG89KhUbmRWEvjnRH9k5kVM5p7T3WwW",
       "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
       "extra": { "name": "USD Coin", "decimals": 6, "feePayer": "2wKupLR9q6wXYppw8Gr2NvWxKBUqm4PPJKkQfoxHDBg4" }
@@ -73,7 +73,7 @@ Content-Type: application/json
 The `accepts` array is the machine-readable price sheet, one entry per rail: `maxAmountRequired` is in USDC base units (6 decimals), `asset` is the USDC contract/mint on the named network. Pick one:
 
 ```bash
-curl -s -X POST http://localhost:4021/scan -H 'content-type: application/json' \
+curl -s -X POST http://localhost:4043/scan -H 'content-type: application/json' \
   -d '{"domain":"flight","current":{"origin":"JFK","destination":"LAX","departureDate":"2026-09-14","pricePaidUsd":412}}' \
   | jq '.accepts[] | {network, payTo, asset, maxAmountRequired}'
 ```
@@ -100,7 +100,7 @@ The server reads `network` off your payload, picks the matching requirement, and
 
 ```
 HTTP/1.1 200 OK
-X-PAYMENT-RESPONSE: <base64 of {"success":true,"rail":"solana","network":"solana","transaction":"5xY…","payer":"7hF…","amount":"10000","asset":"USDC"}>
+X-PAYMENT-RESPONSE: <base64 of {"success":true,"rail":"solana","network":"solana","facilitator":"https://facilitator.payai.network","transaction":"5xY…","payer":"7hF…","amount":"10000","asset":"USDC"}>
 
 {
   "report": {
@@ -140,14 +140,14 @@ curl -s … | jq '.report.payload | {verdict, reason, net: .savings.netUsd, live
 
 ```bash
 # Hotel stay
-curl -X POST http://localhost:4021/scan -H 'content-type: application/json' -d '{
+curl -X POST http://localhost:4043/scan -H 'content-type: application/json' -d '{
   "domain":"hotel",
   "current":{"cityCode":"PAR","checkIn":"2026-09-14","checkOut":"2026-09-16","adults":2,"pricePaidUsd":280,"hotelName":"Hotel Lumiere"},
   "minSavingsUsd":20
 }'
 
 # Campsite
-curl -X POST http://localhost:4021/scan -H 'content-type: application/json' -d '{
+curl -X POST http://localhost:4043/scan -H 'content-type: application/json' -d '{
   "domain":"campsite",
   "current":{"stateCode":"CA","query":"Yosemite","arrival":"2026-09-14","nights":2,"pricePaidUsd":35},
   "minSavingsUsd":5
@@ -157,9 +157,9 @@ curl -X POST http://localhost:4021/scan -H 'content-type: application/json' -d '
 ## 5. Free routes need no payment
 
 ```bash
-curl -s http://localhost:4021/sources | jq
-curl -s http://localhost:4021/healthz
-curl -s http://localhost:4021/.well-known/x402 | jq
-curl -s -X POST http://localhost:4021/verify \
+curl -s http://localhost:4043/sources | jq
+curl -s http://localhost:4043/healthz
+curl -s http://localhost:4043/.well-known/x402 | jq
+curl -s -X POST http://localhost:4043/verify \
   -H 'content-type: application/json' -d '{"payload":{…},"signature":"…"}'
 ```

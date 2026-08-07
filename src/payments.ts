@@ -110,6 +110,8 @@ export interface PaymentReceipt {
   success: true;
   rail: "evm" | "solana";
   network: string;
+  /** The facilitator that verified + settled this payment. Differs per rail. */
+  facilitator: string;
   transaction: string | null;
   payer: string | null;
   amount: string;
@@ -301,6 +303,7 @@ export function paywall(routePrices: RoutePrices, opts: PaywallOptions): Request
         success: true,
         rail: requirement.network.startsWith("solana") ? "solana" : "evm",
         network: settlement.network ?? requirement.network,
+        facilitator: facilitatorFor(requirement.network),
         transaction: settlement.transaction ?? null,
         payer: settlement.payer ?? null,
         amount: requirement.maxAmountRequired,

@@ -23,7 +23,7 @@ The value of a rebooking scan decays to nothing between checks, so subscriptions
 git clone https://github.com/nirholas/x402-rebooker && cd x402-rebooker
 npm install
 cp .env.example .env        # pre-filled — runs with no edits
-npm run dev                 # server on http://localhost:4021
+npm run dev                 # server on http://localhost:4043
 ```
 
 Then run the full paid flow with a wallet holding [Base Sepolia USDC](https://faucet.circle.com):
@@ -44,7 +44,7 @@ To receive the fees yourself, set `PAY_TO_ADDRESS` (Base) and `SOLANA_PAY_TO_ADD
 | `GET /healthz` | free | Liveness + the rails this deployment accepts |
 
 ```bash
-curl -X POST http://localhost:4021/scan -H 'content-type: application/json' -d '{
+curl -X POST http://localhost:4043/scan -H 'content-type: application/json' -d '{
   "domain": "flight",
   "current": {
     "origin": "JFK", "destination": "LAX", "departureDate": "2026-09-14",
@@ -83,7 +83,7 @@ Three domains: `flight` and `hotel` (Amadeus), `campsite` (RIDB). Full field ref
 1. Client calls a paid route → server responds `402 Payment Required` with an `accepts` array holding **both** payment requirements: USDC on Base (EVM) and USDC on Solana (SVM), same price, same resource.
 2. Client picks the rail its wallet supports and authorizes exactly that amount — an EIP-3009 transfer authorization on Base, or a fee-sponsored SPL `transferChecked` on Solana — then retries with the `X-PAYMENT` header.
 3. The server reads `network` off the payload, selects the matching requirement, and verifies + settles through that rail's facilitator (x402.org for Base, PayAI for Solana by default).
-4. Server responds `200` with the report in-body and an `X-PAYMENT-RESPONSE` header carrying the settlement receipt (`rail`, `network`, `transaction`, `payer`).
+4. Server responds `200` with the report in-body and an `X-PAYMENT-RESPONSE` header carrying the settlement receipt (`rail`, `network`, `facilitator`, `transaction`, `payer`).
 
 Solana buyers need no SOL: the facilitator's `feePayer` sponsors the network fee, so a USDC balance is enough. `x402-fetch` does steps 2–3 automatically — see [`examples/agent-client.ts`](examples/agent-client.ts) and [`examples/curl.md`](examples/curl.md).
 
