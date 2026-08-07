@@ -1,0 +1,55 @@
+{
+  "name": "x402-rebooker",
+  "version": "0.1.0",
+  "description": "The cancel-worse-book-better move, automated — scans real inventory (Amadeus/RIDB) against your current booking, returns an actionable improvement report",
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "nirholas <nichxbt@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nirholas/x402-rebooker"
+  },
+  "homepage": "https://nirholas.github.io/x402-rebooker/",
+  "bugs": {
+    "url": "https://github.com/nirholas/x402-rebooker/issues",
+    "email": "nichxbt@gmail.com"
+  },
+  "keywords": [
+    "x402",
+    "micropayments",
+    "usdc",
+    "solana",
+    "base",
+    "ai-agents",
+    "agentic-commerce",
+    "http-402",
+    "travel",
+    "amadeus",
+    "ridb",
+    "rebooking",
+    "price-drop"
+  ],
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "client": "tsx examples/agent-client.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "x402": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "viem": "^2.21.0",
+    "x402-fetch": "^1.2.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,249 @@
+{
+  "x402Version": 1,
+  "name": "x402-rebooker",
+  "description": "The cancel-worse-book-better move, automated — scans real inventory (Amadeus/RIDB) against your current booking and returns an actionable improvement report",
+  "homepage": "https://nirholas.github.io/x402-rebooker/",
+  "repository": "https://github.com/nirholas/x402-rebooker",
+  "contact": "nichxbt@gmail.com",
+  "skill": "/skill.md",
+  "payment": {
+    "note": "Pay in USDC on Base or Solana — your client picks the rail. Every 402 challenge lists both.",
+    "rails": [
+      {
+        "scheme": "exact",
+        "network": "base-sepolia",
+        "asset": "USDC",
+        "assetAddress": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+        "payTo": "0x40252CFDF8B20Ed757D61ff157719F33Ec332402",
+        "facilitator": "https://x402.org/facilitator"
+      },
+      {
+        "scheme": "exact",
+        "network": "solana",
+        "asset": "USDC",
+        "assetAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "payTo": "WwwuGbqHrwF5RG89KhUbmRWEvjnRH9k5kVM5p7T3WwW",
+        "facilitator": "https://facilitator.payai.network"
+      }
+    ]
+  },
+  "resources": [
+    {
+      "resource": "POST /scan",
+      "description": "Scan live flight, hotel or campsite inventory against a booking you already hold. Returns a signed report: ranked candidates with improvements and tradeoffs, savings net of your cancellation fee, and ordered rebook steps. Verdict is 'hold' when nothing clears your threshold.",
+      "price": "$0.01",
+      "networks": [
+        "base-sepolia",
+        "solana"
+      ],
+      "asset": "USDC",
+      "accepts": [
+        {
+          "scheme": "exact",
+          "network": "base-sepolia",
+          "asset": "USDC",
+          "assetAddress": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+          "payTo": "0x40252CFDF8B20Ed757D61ff157719F33Ec332402",
+          "facilitator": "https://x402.org/facilitator",
+          "maxAmountRequired": "10000"
+        },
+        {
+          "scheme": "exact",
+          "network": "solana",
+          "asset": "USDC",
+          "assetAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "payTo": "WwwuGbqHrwF5RG89KhUbmRWEvjnRH9k5kVM5p7T3WwW",
+          "facilitator": "https://facilitator.payai.network",
+          "maxAmountRequired": "10000",
+          "extra": {
+            "name": "USD Coin",
+            "decimals": 6,
+            "feePayer": "2wKupLR9q6wXYppw8Gr2NvWxKBUqm4PPJKkQfoxHDBg4"
+          }
+        }
+      ],
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "report": {
+            "type": "object",
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "reportId": {
+                    "type": "string"
+                  },
+                  "domain": {
+                    "type": "string",
+                    "enum": [
+                      "flight",
+                      "hotel",
+                      "campsite"
+                    ]
+                  },
+                  "source": {
+                    "type": "string",
+                    "enum": [
+                      "amadeus",
+                      "ridb",
+                      "fixture"
+                    ]
+                  },
+                  "live": {
+                    "type": "boolean"
+                  },
+                  "pricePaidUsd": {
+                    "type": "number"
+                  },
+                  "cancellationFeeUsd": {
+                    "type": "number"
+                  },
+                  "minSavingsUsd": {
+                    "type": "number"
+                  },
+                  "scanned": {
+                    "type": "integer"
+                  },
+                  "candidates": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "priceUsd": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "savingsUsd": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "netSavingsUsd": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "improvements": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "tradeoffs": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "details": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  },
+                  "best": {
+                    "type": [
+                      "object",
+                      "null"
+                    ]
+                  },
+                  "savings": {
+                    "type": "object",
+                    "properties": {
+                      "grossUsd": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "cancellationFeeUsd": {
+                        "type": "number"
+                      },
+                      "netUsd": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "pct": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      }
+                    }
+                  },
+                  "rebookSteps": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "step": {
+                          "type": "integer"
+                        },
+                        "action": {
+                          "type": "string"
+                        },
+                        "detail": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "verdict": {
+                    "type": "string",
+                    "enum": [
+                      "rebook",
+                      "hold"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string"
+                  },
+                  "notes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "scannedAt": {
+                    "type": "string"
+                  }
+                }
+              },
+              "signature": {
+                "type": "string"
+              },
+              "algorithm": {
+                "type": "string",
+                "const": "HMAC-SHA256"
+              },
+              "canonicalization": {
+                "type": "string",
+                "const": "sorted-json"
+              }
+            }
+          },
+          "payment": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Settlement receipt for this call — same content as X-PAYMENT-RESPONSE."
+          }
+        }
+      }
+    }
+  ]
+}

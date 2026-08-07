@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>x402-rebooker — scan your booking against live inventory</title>
+<meta name="description" content="The cancel-worse-book-better move, automated. Post a booking you already hold; one paid call scans live inventory for the same trip and returns a signed improvement report — ranked candidates, savings net of your cancellation fee, and the exact order to rebook in.">
+<style>
+  :root { --accent:#0052ff; --sol:#9945ff; --bg:#ffffff; --fg:#14171a; --muted:#5a6570; --card:#f6f8fa; --border:#e2e5e9; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d1117; --fg:#e6e8ea; --muted:#9aa4ae; --card:#161b22; --border:#2d333b; }
+  }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--bg); color:var(--fg); line-height:1.6;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  main { max-width:880px; margin:0 auto; padding:3rem 1.25rem 5rem; }
+  h1 { font-size:2.2rem; letter-spacing:-.02em; } h1 span{color:var(--accent);}
+  h2 { font-size:1.35rem; margin:2.5rem 0 .8rem; }
+  h3 { font-size:1rem; margin-bottom:.35rem; }
+  p.lead { font-size:1.1rem; color:var(--muted); margin:.8rem 0 1.4rem; max-width:62ch; }
+  a { color:var(--accent); text-decoration:none; } a:hover{text-decoration:underline;}
+  .links { display:flex; flex-wrap:wrap; gap:.8rem; margin:1.2rem 0; }
+  .links a { border:1px solid var(--border); border-radius:8px; padding:.45rem .9rem; font-size:.9rem; }
+  .links a.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .badge { display:inline-block; background:var(--card); border:1px solid var(--border);
+    border-radius:999px; padding:.2rem .7rem; font-size:.78rem; color:var(--muted); margin:0 .4rem .4rem 0; }
+  pre { background:var(--card); border:1px solid var(--border); border-radius:10px;
+    padding:1rem 1.2rem; overflow-x:auto; font-size:.85rem; margin:.8rem 0; }
+  code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  .tablewrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; margin:.8rem 0; font-size:.92rem; min-width:32rem; }
+  th,td { text-align:left; padding:.55rem .7rem; border-bottom:1px solid var(--border); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; font-size:.8rem; text-transform:uppercase; letter-spacing:.04em; }
+  .flow { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; margin:1rem 0; }
+  .flow .step { background:var(--card); border:1px solid var(--border); border-radius:10px;
+    padding:.7rem 1rem; font-size:.88rem; flex:1 1 12rem; }
+  .flow .step b { color:var(--accent); display:block; font-size:.78rem; }
+  .flow .arrow { color:var(--muted); font-size:1.1rem; }
+  .rails { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem; margin:1rem 0; }
+  .rail { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1rem 1.15rem; }
+  .rail .dot { display:inline-block; width:.55rem; height:.55rem; border-radius:50%; margin-right:.45rem; }
+  .rail p { font-size:.86rem; color:var(--muted); }
+  .rail code { font-size:.78rem; word-break:break-all; }
+  .rail dl { margin:.5rem 0 0; font-size:.82rem; color:var(--muted); }
+  .rail dt { font-weight:600; margin-top:.4rem; color:var(--fg); }
+  footer { margin-top:4rem; color:var(--muted); font-size:.85rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1><span>x402-rebooker</span></h1>
+  <p class="lead">The cancel-worse-book-better move, automated. Post a booking you already hold; one paid call scans live inventory for the same trip and returns a <strong>signed improvement report</strong> — ranked candidates, savings net of your cancellation fee, and the exact order to rebook in.</p>
+  <p><span class="badge">USDC on Base</span><span class="badge">USDC on Solana</span><span class="badge">HTTP 402</span><span class="badge">Apache-2.0</span><span class="badge">Amadeus</span><span class="badge">RIDB</span><span class="badge">signed reports</span></p>
+  <p class="lead"><strong>Pay on either rail — your client picks.</strong> Every 402 challenge
+  lists USDC on Base and USDC on Solana at the same price.</p>
+
+  <pre><code>git clone https://github.com/nirholas/x402-rebooker &amp;&amp; cd x402-rebooker
+npm install &amp;&amp; cp .env.example .env   # pre-filled — runs with no edits
+npm run dev                            # http://localhost:4021</code></pre>
+
+  <div class="links">
+    <a class="primary" href="https://github.com/nirholas/x402-rebooker">GitHub</a>
+    <a href="tutorial">Tutorial</a>
+    <a href="api">API reference</a>
+    <a href="agents">For AI agents</a>
+    <a href="https://github.com/nirholas/x402-rebooker/blob/main/skill.md">skill.md</a>
+    <a href="https://github.com/nirholas/x402-rebooker/blob/main/public/.well-known/x402">.well-known/x402</a>
+  </div>
+
+  <h2>Pricing</h2>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Route</th><th>Price</th><th>Returns</th></tr>
+    <tr><td><code>POST /scan</code></td><td>$0.01</td><td>Signed report: candidates, savings, rebookSteps, verdict</td></tr>
+    <tr><td><code>GET /sources</code></td><td>free</td><td>Which inventory providers are live here</td></tr>
+    <tr><td><code>POST /verify</code></td><td>free</td><td>Signature check for any report</td></tr>
+    <tr><td><code>GET /healthz</code></td><td>free</td><td>Liveness + accepted rails</td></tr>
+  </table>
+  </div>
+
+  <h2>Payment rails</h2>
+  <div class="rails">
+    <div class="rail">
+      <h3><span class="dot" style="background:var(--accent)"></span>USDC on Base</h3>
+      <p>EIP-3009 <code>transferWithAuthorization</code>, signed in the wallet. Nothing on-chain
+      until the facilitator settles.</p>
+      <dl>
+        <dt>network</dt><dd><code>base-sepolia</code> (default) · <code>base</code></dd>
+        <dt>payTo</dt><dd><code>0x40252CFDF8B20Ed757D61ff157719F33Ec332402</code></dd>
+        <dt>facilitator</dt><dd><code>https://x402.org/facilitator</code></dd>
+      </dl>
+    </div>
+    <div class="rail">
+      <h3><span class="dot" style="background:var(--sol)"></span>USDC on Solana</h3>
+      <p>Fee-sponsored SPL <code>transferChecked</code>. The facilitator's <code>feePayer</code>
+      covers the SOL fee — you need only USDC.</p>
+      <dl>
+        <dt>network</dt><dd><code>solana</code> (default) · <code>solana-devnet</code></dd>
+        <dt>payTo</dt><dd><code>WwwuGbqHrwF5RG89KhUbmRWEvjnRH9k5kVM5p7T3WwW</code></dd>
+        <dt>facilitator</dt><dd><code>https://facilitator.payai.network</code></dd>
+      </dl>
+    </div>
+  </div>
+  <p style="font-size:.9rem;color:var(--muted)">A rail with no configured address is dropped from
+  the challenge instead of failing the request, so a single-rail deployment is a one-line change.</p>
+
+  <h2>How a paid call works</h2>
+  <div class="flow">
+    <div class="step"><b>1 · Request</b>POST /scan with the booking you hold</div>
+    <div class="arrow">→</div>
+    <div class="step"><b>2 · 402</b>accepts[]: Base and Solana, same price</div>
+    <div class="arrow">→</div>
+    <div class="step"><b>3 · Pay</b>pick a rail, sign, send X-PAYMENT</div>
+    <div class="arrow">→</div>
+    <div class="step"><b>4 · 200</b>signed report in-body + X-PAYMENT-RESPONSE</div>
+  </div>
+
+  <h2>It tells you to hold</h2>
+  <p>A scanner that always finds savings is a sales pitch. This one ranks the worse options
+  alongside the better ones, subtracts your cancellation fee before claiming a win, and returns
+  <code>verdict: "hold"</code> whenever nothing clears the threshold you set:</p>
+  <pre><code>{
+  "savings": { "grossUsd": 145.31, "cancellationFeeUsd": 75, "netUsd": 70.31, "pct": 17.1 },
+  "verdict": "rebook",
+  "reason": "Best option nets $70.31 after a $75 cancellation fee, clearing your $25 threshold.",
+  "best": {
+    "label": "B6 621 · nonstop · departs 2026-09-14T15:00",
+    "improvements": ["$145.31 cheaper than what you paid", "1 fewer stop(s)"],
+    "tradeoffs": ["different carrier (B6 vs AA) — loyalty status may not carry"]
+  }
+}</code></pre>
+  <p>Every candidate carries <code>tradeoffs</code> as well as <code>improvements</code>, and
+  <code>rebookSteps</code> always puts <em>book the replacement first</em> ahead of <em>cancel the
+  old booking</em> — the one irreversible mistake in this whole move.</p>
+
+  <h2>Real inventory, honest fallbacks</h2>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Domain</th><th>Provider</th><th>Live when</th><th>Otherwise</th></tr>
+    <tr><td>flight</td><td>Amadeus <code>/v2/shopping/flight-offers</code></td><td><code>AMADEUS_CLIENT_ID</code> + <code>AMADEUS_CLIENT_SECRET</code></td><td>deterministic fixtures</td></tr>
+    <tr><td>hotel</td><td>Amadeus <code>/v3/shopping/hotel-offers</code></td><td>same</td><td>deterministic fixtures</td></tr>
+    <tr><td>campsite</td><td>RIDB <code>/facilities</code></td><td><code>RIDB_API_KEY</code></td><td>deterministic fixtures</td></tr>
+  </table>
+  </div>
+  <p>Both keys are free, and neither is required to run the service. Fixture-backed reports say so
+  in <code>source</code>, <code>live</code> and <code>notes</code> — you will never mistake one for
+  a real scan. A live lookup that fails degrades to fixtures with a note rather than failing the
+  paid call, so a scan you paid for always returns a report.</p>
+
+  <footer>Questions: <a href="mailto:nichxbt@gmail.com">nichxbt@gmail.com</a> · Apache-2.0 ·
+  Part of the <a href="https://github.com/nirholas/x402-suite">x402 Suite</a> ·
+  Built on <a href="https://x402.org">x402</a></footer>
+</main>
+</body>
+</html>

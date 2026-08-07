@@ -1,0 +1,705 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "x402-rebooker",
+    "version": "0.1.0",
+    "description": "Scan live inventory (Amadeus flights/hotels, RIDB campsites) against a booking you already hold and get back a signed improvement report. Paid routes respond 402 with a dual-rail x402 challenge (USDC on Base and USDC on Solana) until an X-PAYMENT header settles on either rail.",
+    "license": {
+      "name": "Apache-2.0",
+      "identifier": "Apache-2.0"
+    },
+    "contact": {
+      "name": "nirholas",
+      "email": "nichxbt@gmail.com",
+      "url": "https://github.com/nirholas/x402-rebooker"
+    }
+  },
+  "paths": {
+    "/scan": {
+      "post": {
+        "summary": "Scan inventory against your current booking ($0.01)",
+        "description": "Returns ranked candidates with improvements and tradeoffs, savings net of your cancellation fee, and ordered rebook steps. The verdict is 'hold' whenever nothing clears minSavingsUsd.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScanRequest"
+              },
+              "examples": {
+                "flight": {
+                  "summary": "Flight you already booked",
+                  "value": {
+                    "domain": "flight",
+                    "current": {
+                      "origin": "JFK",
+                      "destination": "LAX",
+                      "departureDate": "2026-09-14",
+                      "adults": 1,
+                      "pricePaidUsd": 412,
+                      "stops": 1,
+                      "carrier": "AA",
+                      "bookingRef": "ABC123"
+                    },
+                    "cancellationFeeUsd": 75,
+                    "minSavingsUsd": 25
+                  }
+                },
+                "hotel": {
+                  "summary": "Hotel stay you already booked",
+                  "value": {
+                    "domain": "hotel",
+                    "current": {
+                      "cityCode": "PAR",
+                      "checkIn": "2026-09-14",
+                      "checkOut": "2026-09-16",
+                      "adults": 2,
+                      "pricePaidUsd": 280,
+                      "hotelName": "Hotel Lumiere"
+                    },
+                    "cancellationFeeUsd": 0,
+                    "minSavingsUsd": 20
+                  }
+                },
+                "campsite": {
+                  "summary": "Campsite you already booked",
+                  "value": {
+                    "domain": "campsite",
+                    "current": {
+                      "stateCode": "CA",
+                      "query": "Yosemite",
+                      "arrival": "2026-09-14",
+                      "nights": 2,
+                      "pricePaidUsd": 35
+                    },
+                    "minSavingsUsd": 5
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Signed improvement report.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "report": {
+                      "type": "object",
+                      "properties": {
+                        "payload": {
+                          "type": "object",
+                          "properties": {
+                            "reportId": {
+                              "type": "string"
+                            },
+                            "domain": {
+                              "type": "string",
+                              "enum": [
+                                "flight",
+                                "hotel",
+                                "campsite"
+                              ]
+                            },
+                            "source": {
+                              "type": "string",
+                              "enum": [
+                                "amadeus",
+                                "ridb",
+                                "fixture"
+                              ]
+                            },
+                            "live": {
+                              "type": "boolean"
+                            },
+                            "pricePaidUsd": {
+                              "type": "number"
+                            },
+                            "cancellationFeeUsd": {
+                              "type": "number"
+                            },
+                            "minSavingsUsd": {
+                              "type": "number"
+                            },
+                            "scanned": {
+                              "type": "integer"
+                            },
+                            "candidates": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "label": {
+                                    "type": "string"
+                                  },
+                                  "priceUsd": {
+                                    "type": [
+                                      "number",
+                                      "null"
+                                    ]
+                                  },
+                                  "savingsUsd": {
+                                    "type": [
+                                      "number",
+                                      "null"
+                                    ]
+                                  },
+                                  "netSavingsUsd": {
+                                    "type": [
+                                      "number",
+                                      "null"
+                                    ]
+                                  },
+                                  "improvements": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "tradeoffs": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "details": {
+                                    "type": "object"
+                                  }
+                                }
+                              }
+                            },
+                            "best": {
+                              "type": [
+                                "object",
+                                "null"
+                              ]
+                            },
+                            "savings": {
+                              "type": "object",
+                              "properties": {
+                                "grossUsd": {
+                                  "type": [
+                                    "number",
+                                    "null"
+                                  ]
+                                },
+                                "cancellationFeeUsd": {
+                                  "type": "number"
+                                },
+                                "netUsd": {
+                                  "type": [
+                                    "number",
+                                    "null"
+                                  ]
+                                },
+                                "pct": {
+                                  "type": [
+                                    "number",
+                                    "null"
+                                  ]
+                                }
+                              }
+                            },
+                            "rebookSteps": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "step": {
+                                    "type": "integer"
+                                  },
+                                  "action": {
+                                    "type": "string"
+                                  },
+                                  "detail": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            },
+                            "verdict": {
+                              "type": "string",
+                              "enum": [
+                                "rebook",
+                                "hold"
+                              ]
+                            },
+                            "reason": {
+                              "type": "string"
+                            },
+                            "notes": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "scannedAt": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "signature": {
+                          "type": "string"
+                        },
+                        "algorithm": {
+                          "type": "string",
+                          "const": "HMAC-SHA256"
+                        },
+                        "canonicalization": {
+                          "type": "string",
+                          "const": "sorted-json"
+                        }
+                      }
+                    },
+                    "payment": {
+                      "$ref": "#/components/schemas/PaymentReceipt"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "X-PAYMENT-RESPONSE": {
+                "description": "Base64 JSON settlement receipt.",
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentReceipt"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body — names the missing field and includes a worked example.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "hint": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required — dual-rail x402 challenge.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRequirements"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "scan_failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "detail": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Facilitator unreachable or settlement error — nothing was charged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-PAYMENT",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Base64-encoded x402 payment payload. Its `network` selects the rail (base-sepolia/base or solana/solana-devnet). Omit it to receive the 402 challenge."
+          }
+        ]
+      }
+    },
+    "/sources": {
+      "get": {
+        "summary": "Which inventory providers are live here (free)",
+        "responses": {
+          "200": {
+            "description": "Provider status per domain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/verify": {
+      "post": {
+        "summary": "Verify a signed report (free)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "payload": {},
+                  "signature": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "payload",
+                  "signature"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Signature check.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valid": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Body must be {payload, signature}."
+          }
+        }
+      }
+    },
+    "/healthz": {
+      "get": {
+        "summary": "Liveness + accepted rails (free)",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/x402": {
+      "get": {
+        "summary": "Machine-readable x402 manifest (free)",
+        "responses": {
+          "200": {
+            "description": "Manifest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ScanRequest": {
+        "type": "object",
+        "required": [
+          "domain",
+          "current"
+        ],
+        "properties": {
+          "domain": {
+            "type": "string",
+            "enum": [
+              "flight",
+              "hotel",
+              "campsite"
+            ]
+          },
+          "current": {
+            "type": "object",
+            "description": "The booking you already hold. flight: origin, destination, departureDate, pricePaidUsd. hotel: cityCode, checkIn, checkOut, pricePaidUsd. campsite: pricePaidUsd plus stateCode or query.",
+            "properties": {
+              "pricePaidUsd": {
+                "type": "number",
+                "description": "What you paid. Required in every domain."
+              },
+              "origin": {
+                "type": "string"
+              },
+              "destination": {
+                "type": "string"
+              },
+              "departureDate": {
+                "type": "string"
+              },
+              "returnDate": {
+                "type": "string"
+              },
+              "adults": {
+                "type": "integer"
+              },
+              "cabin": {
+                "type": "string"
+              },
+              "stops": {
+                "type": "integer"
+              },
+              "carrier": {
+                "type": "string"
+              },
+              "cityCode": {
+                "type": "string"
+              },
+              "checkIn": {
+                "type": "string"
+              },
+              "checkOut": {
+                "type": "string"
+              },
+              "hotelName": {
+                "type": "string"
+              },
+              "stateCode": {
+                "type": "string"
+              },
+              "query": {
+                "type": "string"
+              },
+              "latitude": {
+                "type": "number"
+              },
+              "longitude": {
+                "type": "number"
+              },
+              "radiusMiles": {
+                "type": "number"
+              },
+              "campgroundName": {
+                "type": "string"
+              },
+              "bookingRef": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "pricePaidUsd"
+            ]
+          },
+          "cancellationFeeUsd": {
+            "type": "number",
+            "default": 0,
+            "description": "What it costs to walk away from the booking you hold."
+          },
+          "minSavingsUsd": {
+            "type": "number",
+            "default": 1,
+            "description": "Don't recommend a switch that nets less than this."
+          },
+          "maxCandidates": {
+            "type": "integer",
+            "default": 5,
+            "minimum": 1,
+            "maximum": 20
+          }
+        }
+      },
+      "PaymentRequirements": {
+        "type": "object",
+        "description": "x402 payment requirements returned with HTTP 402. `accepts` always carries BOTH rails — USDC on Base (EVM) and USDC on Solana — at the same price; the client picks one and names it in the `network` field of its X-PAYMENT payload.",
+        "properties": {
+          "x402Version": {
+            "type": "integer"
+          },
+          "error": {
+            "type": "string"
+          },
+          "accepts": {
+            "type": "array",
+            "description": "One entry per accepted payment rail.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "scheme": {
+                  "type": "string",
+                  "const": "exact"
+                },
+                "network": {
+                  "type": "string",
+                  "examples": [
+                    "base-sepolia",
+                    "solana"
+                  ]
+                },
+                "maxAmountRequired": {
+                  "type": "string",
+                  "description": "USDC atomic units (6 decimals)."
+                },
+                "resource": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "mimeType": {
+                  "type": "string"
+                },
+                "payTo": {
+                  "type": "string"
+                },
+                "maxTimeoutSeconds": {
+                  "type": "integer"
+                },
+                "asset": {
+                  "type": "string",
+                  "description": "USDC contract (EVM) or mint (Solana)."
+                },
+                "extra": {
+                  "type": "object",
+                  "description": "EVM: EIP-712 domain (name/version). Solana: {name, decimals, feePayer} — feePayer sponsors the SOL network fee so the buyer needs only USDC."
+                }
+              }
+            }
+          }
+        },
+        "examples": [
+          {
+            "x402Version": 1,
+            "error": "X-PAYMENT header is required",
+            "accepts": [
+              {
+                "scheme": "exact",
+                "network": "base-sepolia",
+                "maxAmountRequired": "10000",
+                "resource": "https://your-deployment.example.com/scan",
+                "description": "x402-rebooker: POST /scan",
+                "mimeType": "application/json",
+                "payTo": "0x40252CFDF8B20Ed757D61ff157719F33Ec332402",
+                "maxTimeoutSeconds": 60,
+                "asset": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+                "extra": {
+                  "name": "USDC",
+                  "version": "2"
+                }
+              },
+              {
+                "scheme": "exact",
+                "network": "solana",
+                "maxAmountRequired": "10000",
+                "resource": "https://your-deployment.example.com/scan",
+                "description": "x402-rebooker: POST /scan",
+                "mimeType": "application/json",
+                "payTo": "WwwuGbqHrwF5RG89KhUbmRWEvjnRH9k5kVM5p7T3WwW",
+                "maxTimeoutSeconds": 60,
+                "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+                "extra": {
+                  "name": "USD Coin",
+                  "decimals": 6,
+                  "feePayer": "2wKupLR9q6wXYppw8Gr2NvWxKBUqm4PPJKkQfoxHDBg4",
+                  "amount": "10000"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "PaymentReceipt": {
+        "type": "object",
+        "description": "Settlement receipt, base64-JSON in the X-PAYMENT-RESPONSE header of every paid 200.",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "rail": {
+            "type": "string",
+            "enum": [
+              "evm",
+              "solana"
+            ]
+          },
+          "network": {
+            "type": "string"
+          },
+          "transaction": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "payer": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "amount": {
+            "type": "string"
+          },
+          "asset": {
+            "type": "string",
+            "const": "USDC"
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4021",
+      "description": "local dev"
+    },
+    {
+      "url": "https://your-deployment.example.com",
+      "description": "self-hosted"
+    }
+  ]
+}
