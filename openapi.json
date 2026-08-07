@@ -378,7 +378,8 @@
               }
             }
           }
-        }
+        },
+        "security": []
       }
     },
     "/verify": {
@@ -423,7 +424,8 @@
           "400": {
             "description": "Body must be {payload, signature}."
           }
-        }
+        },
+        "security": []
       }
     },
     "/healthz": {
@@ -440,7 +442,8 @@
               }
             }
           }
-        }
+        },
+        "security": []
       }
     },
     "/.well-known/x402": {
@@ -457,7 +460,8 @@
               }
             }
           }
-        }
+        },
+        "security": []
       }
     }
   },

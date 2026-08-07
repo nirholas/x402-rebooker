@@ -15,6 +15,17 @@ Also call **`GET /sources`** (free) to learn whether a given deployment can reac
 
 **Operators:** after deploying, submit your base URL to those indexes so agents can find you — x402scan crawls `/.well-known/x402` automatically once listed.
 
+### Protocol version
+
+This service speaks **x402 v1**: the challenge body is `{ x402Version: 1, error, accepts[] }`, and
+every entry in `accepts` carries `outputSchema.input` / `outputSchema.output`, so you can build a
+valid request and know the response shape before you spend anything.
+
+x402 **v2** — CAIP-2 network identifiers and `extensions.bazaar.schema` — is a planned upgrade for
+[agentcash](https://x402scan.com/discovery/spec) compatibility. It changes the shape of the
+challenge, so it will arrive as a deliberate version bump rather than silently; until then, pin an
+x402 v1 client such as `x402-fetch`.
+
 ## Paying
 
 Any x402-compatible client works. With `x402-fetch`:

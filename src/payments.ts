@@ -47,6 +47,11 @@ export interface PaywallOptions {
   baseUrl?: string;
   /** Optional per-route descriptions, keyed exactly like `routePrices`. */
   descriptions?: Record<string, string>;
+  /**
+   * Optional per-route input/output schemas, keyed exactly like `routePrices`.
+   * Each is copied verbatim into `accepts[].outputSchema` on every rail.
+   */
+  schemas?: Record<string, RouteSchema>;
 }
 
 export interface RailInfo {
@@ -62,6 +67,20 @@ export interface RailInfo {
  * `POST /pools/pool_abc/pay`.
  */
 export type RoutePrices = Record<string, string>;
+
+/**
+ * The x402 Bazaar `outputSchema` for one paid route: how to call it, and what
+ * the 200 body looks like. Published inside every `accepts` entry so an agent
+ * can construct a valid request straight from the 402 challenge, without
+ * fetching `openapi.json` first. Generated into `schemas.ts` from the OpenAPI
+ * document so spec and runtime cannot drift.
+ */
+export interface RouteSchema {
+  /** `{type:"http", method, queryParams|bodyType+bodyFields, pathParams?}`. */
+  input: Record<string, unknown>;
+  /** JSON Schema of the 200 response body. */
+  output: Record<string, unknown>;
+}
 
 const EVM_NETWORK = (process.env.NETWORK === "base" ? "base" : "base-sepolia") as Network;
 const EVM_PAY_TO = process.env.PAY_TO_ADDRESS ?? DEFAULT_EVM_PAY_TO;
@@ -160,7 +179,12 @@ function resourceUrl(req: Request, baseUrl?: string): string {
  * Build the `accepts` array: one canonical x402 `PaymentRequirements` per rail.
  * Amounts are USDC atomic units (6 decimals) — `$0.002` → `"2000"`.
  */
-function buildAccepts(price: string, resource: string, description: string): PaymentRequirements[] {
+function buildAccepts(
+  price: string,
+  resource: string,
+  description: string,
+  outputSchema?: RouteSchema,
+): PaymentRequirements[] {
   const accepts: PaymentRequirements[] = [];
 
   for (const rail of activeRails()) {
@@ -180,6 +204,7 @@ function buildAccepts(price: string, resource: string, description: string): Pay
         payTo: rail.payTo,
         maxTimeoutSeconds: 60,
         asset: priced.asset.address,
+        outputSchema,
         extra: "eip712" in priced.asset ? priced.asset.eip712 : undefined,
       });
     } else {
@@ -200,6 +225,7 @@ function buildAccepts(price: string, resource: string, description: string): Pay
         payTo: rail.payTo,
         maxTimeoutSeconds: 60,
         asset: SOLANA_DEVNET ? USDC_MINT_SOLANA_DEVNET : USDC_MINT_SOLANA,
+        outputSchema,
         extra: {
           name: "USD Coin",
           decimals: 6,
@@ -244,7 +270,7 @@ export function paywall(routePrices: RoutePrices, opts: PaywallOptions): Request
     const price = routePrices[key];
 
     const resource = resourceUrl(req, opts.baseUrl ?? process.env.PUBLIC_BASE_URL);
-    const accepts = buildAccepts(price, resource, describe(key));
+    const accepts = buildAccepts(price, resource, describe(key), opts.schemas?.[key]);
 
     if (accepts.length === 0) {
       res.status(500).json({

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>x402-rebooker — rescan a booking you already hold</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/favicon.svg">
+<meta name="description" content="Scan live inventory — Amadeus flights and hotels, RIDB campsites — against a booking you already hold and get back a signed improvement report with the net saving after cancellation fees.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="x402-rebooker">
+<meta property="og:title" content="x402-rebooker — rescan a booking you already hold">
+<meta property="og:description" content="Scan live inventory — Amadeus flights and hotels, RIDB campsites — against a booking you already hold and get back a signed improvement report with the net saving after cancellation fees.">
+<meta property="og:image" content="/og.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="x402-rebooker — rescan a booking you already hold">
+<meta name="twitter:description" content="Scan live inventory — Amadeus flights and hotels, RIDB campsites — against a booking you already hold and get back a signed improvement report with the net saving after cancellation fees.">
+<meta name="twitter:image" content="/og.svg">
+<style>
+  :root { --accent:#0052ff; --sol:#9945ff; --bg:#fff; --fg:#14171a; --muted:#5a6570;
+           --card:#f6f8fa; --border:#e2e5e9; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d1117; --fg:#e6e8ea; --muted:#9aa4ae; --card:#161b22; --border:#2d333b; }
+  }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--bg); color:var(--fg); line-height:1.6;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:3rem 1.25rem 4rem; }
+  .mark { width:40px; height:40px; border-radius:10px; display:grid; place-items:center;
+    background:linear-gradient(135deg,var(--accent),var(--sol)); color:#fff; font-weight:700;
+    font-size:.85rem; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    margin-bottom:1rem; }
+  h1 { font-size:2rem; letter-spacing:-.02em; }
+  p.lead { font-size:1.08rem; color:var(--muted); margin:.7rem 0 1.4rem; max-width:60ch; }
+  h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted);
+    margin:2.2rem 0 .7rem; }
+  a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+  .links { display:flex; flex-wrap:wrap; gap:.6rem; }
+  .links a { border:1px solid var(--border); border-radius:8px; padding:.4rem .85rem;
+    font-size:.9rem; color:var(--fg); }
+  .links a.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .tablewrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:.92rem; min-width:30rem; }
+  th,td { text-align:left; padding:.5rem .7rem; border-bottom:1px solid var(--border); }
+  th { color:var(--muted); font-weight:600; font-size:.78rem; text-transform:uppercase;
+    letter-spacing:.04em; }
+  code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.88em; }
+  pre { background:var(--card); border:1px solid var(--border); border-radius:10px;
+    padding:1rem 1.1rem; overflow-x:auto; font-size:.85rem; margin:.7rem 0; }
+  footer { margin-top:3rem; padding-top:1.2rem; border-top:1px solid var(--border);
+    color:var(--muted); font-size:.85rem; }
+</style>
+</head>
+<body>
+<main>
+  <div class="mark">402</div>
+  <h1>x402-rebooker</h1>
+  <p class="lead">Scan live inventory — Amadeus flights and hotels, RIDB campsites — against a booking you already hold and get back a signed improvement report with the net saving after cancellation fees.</p>
+
+  <div class="links">
+    <a class="primary" href="/openapi.json">OpenAPI</a>
+    <a href="/skill.md">skill.md</a>
+    <a href="/.well-known/x402">.well-known/x402</a>
+    <a href="/healthz">Health</a>
+    <a href="https://github.com/nirholas/x402-rebooker">Source</a>
+  </div>
+
+  <h2>Paid routes</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Route</th><th>Price</th><th>Returns</th></tr></thead>
+    <tbody>
+      <tr><td><code>POST /scan</code></td><td>$0.01</td><td>Signed improvement report with net savings</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Paying for a call</h2>
+  <p class="lead">An unpaid request answers <code>402</code> with a dual-rail challenge — USDC on
+  Base and USDC on Solana. Each <code>accepts</code> entry carries an
+  <code>outputSchema</code> describing exactly how to build the request and what the 200 body
+  will contain, so an agent can call the route correctly on its first paid attempt.</p>
+<pre><code>import { wrapFetchWithPayment } from "x402-fetch";
+
+const pay = wrapFetchWithPayment(fetch, wallet);
+const res = await pay("http://localhost:4043/scan");
+const data = await res.json();</code></pre>
+
+  <footer>
+    Free: GET /sources, POST /verify, GET /healthz, GET /.well-known/x402. Payments verify and settle through an x402 facilitator;
+    this page is a static landing card served from <code>public/</code>.
+  </footer>
+</main>
+</body>
+</html>
