@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+title: "x402-rebooker"
+abstract: "The cancel-worse-book-better move, automated: scans real inventory (Amadeus/RIDB) against your current booking, returns an actionable improvement report"
+license: Apache-2.0
+repository-code: "https://github.com/nirholas/x402-rebooker"
+url: "https://three.ws"
+authors:
+  - name: three.ws
+    website: "https://three.ws"
