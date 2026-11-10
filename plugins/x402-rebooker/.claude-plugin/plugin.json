@@ -1,0 +1,18 @@
+{
+  "name": "x402-rebooker",
+  "version": "0.1.0",
+  "description": "Run the x402-rebooker service and scan live flight, hotel and campsite inventory against a booking you hold, paid per scan via x402.",
+  "author": {
+    "name": "nirholas"
+  },
+  "repository": "https://github.com/nirholas/x402-rebooker",
+  "homepage": "https://nirholas.github.io/x402-rebooker/",
+  "license": "Apache-2.0",
+  "keywords": [
+    "x402",
+    "rebooking",
+    "amadeus",
+    "ridb",
+    "travel"
+  ]
+}

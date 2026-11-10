@@ -1,0 +1,22 @@
+{
+  "name": "x402-rebooker",
+  "owner": {
+    "name": "nirholas"
+  },
+  "description": "Run the x402-rebooker service and scan live flight, hotel and campsite inventory against a booking you hold, paid per scan via x402.",
+  "plugins": [
+    {
+      "name": "x402-rebooker",
+      "source": "./plugins/x402-rebooker",
+      "description": "Run the x402-rebooker service and scan live flight, hotel and campsite inventory against a booking you hold, paid per scan via x402.",
+      "category": "automation",
+      "tags": [
+        "x402",
+        "rebooking",
+        "amadeus",
+        "ridb",
+        "travel"
+      ]
+    }
+  ]
+}
